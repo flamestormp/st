@@ -3,7 +3,7 @@ index 877afab..7305ec9 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -84,42 +84,54 @@ static unsigned int tabspaces = 8;
- 
+
  /* Terminal colors (16 first used in escape sequence) */
  const char *colorname[] = {
 -	/* 8 normal colors */
@@ -50,7 +50,7 @@ index 877afab..7305ec9 100644
 +	"#fdf6e3",  /* 15: brwhite  */
  };
 -
-+ 
++
 +/* Terminal colors for alternate (light) palette */
 +const char *altcolorname[] = {
 +	/* solarized light */
@@ -71,7 +71,7 @@ index 877afab..7305ec9 100644
 +	"#586e75",  /* 14: brcyan   */
 +	"#002b36",  /* 15: brwhite  */
 + };
- 
+
  /*
   * Default colors (colorname index)
   * foreground, background, cursor, reverse cursor
@@ -84,7 +84,7 @@ index 877afab..7305ec9 100644
 +unsigned int defaultbg = 8;
 +unsigned int defaultcs = 14;
 +unsigned int defaultrcs = 15;
- 
+
  /*
   * Default shape of cursor
 @@ -178,6 +190,7 @@ Shortcut shortcuts[] = {
@@ -93,7 +93,7 @@ index 877afab..7305ec9 100644
  	{ TERMMOD,              XK_I,           iso14755,       {.i =  0} },
 +	{ XK_ANY_MOD,           XK_F6,          swapcolors,     {.i =  0} },
  };
- 
+
  /*
 diff --git a/st.c b/st.c
 index 8d4a9f2..fc7d9a6 100644
@@ -110,7 +110,7 @@ index 8d4a9f2..fc7d9a6 100644
 @@ -219,6 +220,8 @@ char *opt_name  = NULL;
  char *opt_title = NULL;
  int oldbutton   = 3; /* button event on startup: 3 = release */
- 
+
 +int usealtcolors = 0; /* 1 to use alternate palette */
 +
  static CSIEscape csiescseq;
@@ -118,7 +118,7 @@ index 8d4a9f2..fc7d9a6 100644
  static int iofd = 1;
 @@ -233,7 +236,7 @@ static Rune utfmin[UTF_SIZ + 1] = {       0,    0,  0x80,  0x800,  0x10000};
  static Rune utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF};
- 
+
  /* config.h array lengths */
 -size_t colornamelen = LEN(colorname);
 +size_t colornamelen = MAX(LEN(colorname), LEN(altcolorname));
@@ -128,7 +128,7 @@ index 8d4a9f2..fc7d9a6 100644
 @@ -2631,6 +2634,14 @@ numlock(const Arg *dummy)
  	term.numlock ^= 1;
  }
- 
+
 +void
 +swapcolors(const Arg *dummy)
 +{
@@ -164,12 +164,12 @@ index fbfd350..886918b 100644
  static XWindow xw;
 +
  static XSelection xsel;
- 
+
  /* Font Ring Cache */
 @@ -573,6 +574,11 @@ sixd_to_16bit(int x)
  	return x == 0 ? 0 : 0x3737 + 0x2828 * x;
  }
- 
+
 +const char* getcolorname(int i)
 +{
 +    return (usealtcolors) ?  altcolorname[i] : colorname[i];
@@ -185,10 +185,10 @@ index fbfd350..886918b 100644
 -			name = colorname[i];
 +			name = getcolorname(i);
  	}
- 
+
  	return XftColorAllocName(xw.dpy, xw.vis, xw.cmap, name, ncolor);
 @@ -614,8 +620,8 @@ xloadcols(void)
- 
+
  	for (i = 0; i < dc.collen; i++)
  		if (!xloadcolor(i, NULL, &dc.col[i])) {
 -			if (colorname[i])
@@ -201,14 +201,14 @@ index fbfd350..886918b 100644
 @@ -950,13 +956,13 @@ xinit(void)
  	cursor = XCreateFontCursor(xw.dpy, mouseshape);
  	XDefineCursor(xw.dpy, xw.win, cursor);
- 
+
 -	if (XParseColor(xw.dpy, xw.cmap, colorname[mousefg], &xmousefg) == 0) {
 +	if (XParseColor(xw.dpy, xw.cmap, getcolorname(mousefg), &xmousefg) == 0) {
  		xmousefg.red   = 0xffff;
  		xmousefg.green = 0xffff;
  		xmousefg.blue  = 0xffff;
  	}
- 
+
 -	if (XParseColor(xw.dpy, xw.cmap, colorname[mousebg], &xmousebg) == 0) {
 +	if (XParseColor(xw.dpy, xw.cmap, getcolorname(mousebg), &xmousebg) == 0) {
  		xmousebg.red   = 0x0000;
