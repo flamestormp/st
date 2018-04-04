@@ -19,7 +19,7 @@ The following patches have been applied, and fixed to co-exist
 3. Align line vertically:
     - st-vertcenter-20180320-6ac8c8a.diff
 
-4. support solarized and switch with F6:
+4. Disable lighting up bold colors (to prepare for solarized patch)(:
     - st-no_bold_colors-20170623-b331da5.diff
 
 
