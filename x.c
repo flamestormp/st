@@ -52,8 +52,8 @@ typedef struct {
 static void clipcopy(const Arg *);
 static void clippaste(const Arg *);
 static void numlock(const Arg *);
-static void swapcolors(const Arg *);
 static void selpaste(const Arg *);
+static void swapcolors(const Arg *);
 static void zoom(const Arg *);
 static void zoomabs(const Arg *);
 static void zoomreset(const Arg *);
@@ -241,15 +241,8 @@ static char *opt_name  = NULL;
 static char *opt_title = NULL;
 
 static int oldbutton = 3; /* button event on startup: 3 = release */
-int usealtcolors = 0; /* 1 to use alternate palette */
 
-void
-swapcolors(const Arg *dummy)
-{
-	usealtcolors = !usealtcolors;
-	xloadcols();
-	redraw();
-}
+int usealtcolors = 0; /* 1 to use alternate palette */
 
 void
 clipcopy(const Arg *dummy)
@@ -287,6 +280,14 @@ void
 numlock(const Arg *dummy)
 {
 	win.mode ^= MODE_NUMLOCK;
+}
+
+void
+swapcolors(const Arg *dummy)
+{
+	usealtcolors = !usealtcolors;
+	xloadcols();
+	redraw();
 }
 
 void
@@ -758,7 +759,7 @@ xloadcols(void)
 	static int loaded;
 	Color *cp;
 
-	dc.collen = MAX(LEN(colorname), 256);
+	dc.collen = MAX(LEN(colorname), LEN(altcolorname));
 	dc.col = xmalloc(dc.collen * sizeof(Color));
 
 	if (loaded) {

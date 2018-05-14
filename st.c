@@ -1094,7 +1094,6 @@ kscrollup(const Arg* a)
 	}
 }
 
-
 void
 tscrolldown(int orig, int n, int copyhist)
 {
@@ -1456,6 +1455,9 @@ tsetattr(int *attr, int l)
 			break;
 		case 9:
 			term.c.attr.mode |= ATTR_STRUCK;
+			break;
+		case 21:
+			term.c.attr.mode &= ~ATTR_BOLD;
 			break;
 		case 22:
 			term.c.attr.mode &= ~(ATTR_BOLD | ATTR_FAINT);
